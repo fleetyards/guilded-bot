@@ -1,1 +1,1 @@
-bot: node index.js
+web: yarn start
