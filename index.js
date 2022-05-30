@@ -26,18 +26,20 @@ const validQuestions = {
 };
 
 const resolveShipQuestion = async (subject, question) => {
-  const shipName = subject.toLowerCase().trim().replace(' ', '-');
-  const ship = await fetchShip(shipName);
+  const searchTerm = subject.toLowerCase().trim().replace(' ', '-');
+  const results = await search(searchTerm);
 
-  if (!ship) {
+  if (!results || !results.length) {
     return { content: 'Could not load requested Information' };
   }
+
+  ship = results[0];
 
   if (question == 'info') {
     const embed = new Embed()
       .setTitle(ship.name)
       .setURL(ship.links.frontend)
-      // .setDescription(ship.description)
+      .setDescription(ship.description)
       .setThumbnail(ship.storeImageMedium)
       .addField('Length', ship.lengthLabel, true)
       .addField('Beam', ship.beamLabel, true)
@@ -71,13 +73,15 @@ const resolveShipQuestion = async (subject, question) => {
   }
 };
 
-const fetchShip = async (subject) => {
-  const response = await fetch(`${fleetyardsHost}/models/${subject}`);
+const search = async (searchTerm) => {
+  const response = await fetch(
+    `${fleetyardsHost}/search/?q[search]=${searchTerm}`,
+  );
 
   if (response.status === 200) {
     return response.json();
   } else {
-    console.error(response.statusText, subject);
+    console.error(response.statusText, searchTerm);
   }
 
   return null;
@@ -163,13 +167,10 @@ client.on('messageCreate', async (message) => {
     .trim()
     .split(' ');
 
-  const topic = questionArgs.shift();
+  let topic = questionArgs.shift();
   if (!validTopics.includes(topic)) {
-    message.reply({
-      content: `Don't know what you are asking. Valid topics are: ${validTopics.join(
-        ', ',
-      )}`,
-    });
+    questionArgs.unshift(topic);
+    topic = 'ship';
   }
 
   let question = questionArgs.shift();
