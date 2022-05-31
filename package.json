@@ -4,6 +4,8 @@
   "description": "Fleetyards Guilded Bot",
   "main": "index.mjs",
   "dependencies": {
+    "@sentry/node": "^7.0.0",
+    "@sentry/tracing": "^7.0.0",
     "dotenv": "^16.0.1",
     "guilded.ts": "^0.5.0",
     "node-fetch": "2"
